@@ -325,12 +325,12 @@ if explore_clicked:
                     max_tokens=1400,
                 )
             st.markdown(recommendation)
+        
         except Exception as exc:
-            st.error("Unable to generate recommendations right now.")
-            st.caption(
-                f"Technical detail: {type(exc).__name__}. Check your API key, "
-                "model access, internet connection, and API usage limits."
-            )
+            st.error("Unable to generate recommendations.")
+            st.caption(f"Error type: {type(exc).__name__}")
+            st.code(str(exc))
+
 
         st.subheader("📚 Course pathways to explore")
         matching_courses = [
@@ -393,12 +393,13 @@ if question and question.strip():
         st.session_state.career_chat_messages.append(
             {"role": "assistant", "content": answer}
         )
+    
     except Exception as exc:
-        st.error("The AI request failed. Please try again in a moment.")
-        st.caption(
-            f"Technical detail: {type(exc).__name__}. Check your Groq API key, "
-            "model access, internet connection, and API usage limits."
-        )
+        st.error("The AI request failed.")
+        st.caption(f"Error type: {type(exc).__name__}")
+        st.code(str(exc))
+
+        
         # Keep the user question in history; the next attempt can continue.
 
 with st.sidebar:
