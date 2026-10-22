@@ -133,24 +133,37 @@ def course_database_context(courses: list[dict[str, str]]) -> str:
     return "\n".join(records)[:18000] or "No course records are available."
 
 
+
 def call_groq(messages: list[dict[str, str]], max_tokens: int = 1200) -> str:
     api_key = get_api_key()
     if not api_key:
         raise RuntimeError(
-            "Groq API key is not configured. Add GROQ_API_KEY to "
-            "Streamlit Secrets or your environment variables."
+            "Groq API key is not configured. Add GROQ_API_KEY "
+            "to Streamlit Secrets."
         )
 
     client = Groq(api_key=api_key)
+
     response = client.chat.completions.create(
         model=get_model_name(),
         messages=messages,
         temperature=0.3,
-        max_completion_tokens=max_tokens,
+        max_completion_tokens=max(max_tokens, 2000),
+        include_reasoning=False,
     )
-    content = response.choices[0].message.content
+
+    if not response.choices:
+        raise RuntimeError("Groq returned no response choices.")
+
+    choice = response.choices[0]
+    content = choice.message.content
+
     if not content or not content.strip():
-        raise RuntimeError("The AI returned an empty response. Please try again.")
+        raise RuntimeError(
+            f"Groq returned an empty answer. "
+            f"Finish reason: {choice.finish_reason}"
+        )
+
     return content.strip()
 
 
